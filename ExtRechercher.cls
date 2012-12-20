@@ -7,19 +7,22 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = True
+'=======================================================================================
 Option Explicit
 
-Private pModele                 As ExtModele
-Private pCollPieces             As Collection
-Private pPrendreEnCompteConfig  As Boolean
-Private pPrendreEnCompteExclus  As Boolean
-Private Const pNomClasse        As String = "ExtRechercher"
+Private pModele                     As ExtModele
+Private pCollPieces                 As Collection
+Private pPrendreEnCompteConfig      As Boolean
+Private pPrendreEnCompteExclus      As Boolean
+Private pPrendreEnCompteSupprime    As Boolean
+Private Const pNomClasse            As String = "ExtRechercher"
 Private Erreur As Long, Warning As Long
 
 Private Sub Class_Initialize()
     
     pPrendreEnCompteConfig = True
     pPrendreEnCompteExclus = False
+    pPrendreEnCompteSupprime = False
 End Sub
 
 Private Sub Class_Terminate()
@@ -37,11 +40,19 @@ Public Property Let PrendreEnCompteConfig(T As Boolean)
 End Property
 
 Public Property Get PrendreEnCompteExclus() As Boolean
-    PrendreEnCompteConfig = pPrendreEnCompteExclus
+    PrendreEnCompteExclus = pPrendreEnCompteExclus
 End Property
 
 Public Property Let PrendreEnCompteExclus(T As Boolean)
     pPrendreEnCompteExclus = T
+End Property
+
+Public Property Get PrendreEnCompteSupprime() As Boolean
+    PrendreEnCompteSupprime = pPrendreEnCompteSupprime
+End Property
+
+Public Property Let PrendreEnCompteSupprime(T As Boolean)
+    pPrendreEnCompteSupprime = T
 End Property
 
 Public Function Modele() As ExtModele
@@ -75,7 +86,7 @@ Private Sub ListerLesComposants(ByRef ComposantRacine As ExtComposant, TypeCompo
     Dim Composant           As ExtComposant
     Dim Cle                 As String
     
-    For Each ComposantListe In ComposantRacine.ListedesComposantsEnfants
+    For Each ComposantListe In ComposantRacine.ListedesComposantsEnfants(PrendreEnCompteSupprime)
         
         If (ComposantListe.EstExclu Imp pPrendreEnCompteExclus) Then
             
@@ -95,7 +106,7 @@ Private Sub ListerLesComposants(ByRef ComposantRacine As ExtComposant, TypeCompo
                     
             End If
             
-            If ComposantListe.Modele.Est(cAssemblage) Then
+            If ComposantListe.Modele.Est(cAssemblage) And Not (ComposantListe.EstSupprime) Then
                 ListerLesComposants ComposantListe, TypeComposant, NomComposant
             End If
             

@@ -7,7 +7,9 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = True
+'=======================================================================================
 Option Explicit
+
 Private pSw                 As SldWorks.SldWorks
 Private Const pNomClasse    As String = "ExtSldWorks"
 Private Erreur As Long, Warning As Long
@@ -98,7 +100,24 @@ End Function
 
 Private Function Ouvrir(ByVal Chemin As String, TypeDoc As swDocumentTypes_e) As ModelDoc2
     
-    Set Ouvrir = pSw.OpenDoc6(Chemin, TypeDoc, swOpenDocOptions_e.swOpenDocOptions_Silent, "", Erreur, Warning)
+    Dim vDoc        As Variant
+    Dim Doc         As ModelDoc2
+    
+    'On liste les documents ouverts
+    For Each vDoc In pSw.GetDocuments
+        Set Doc = vDoc
+        'Si les chemin correspondent c'est bon
+        If Doc.GetPathName = Chemin Then
+            Set Ouvrir = Doc
+        End If
+    Next vDoc
+    
+    'Si le document n'est pas ouvert, on le fait
+    If Ouvrir Is Nothing Then
+        Set Ouvrir = pSw.OpenDoc6(Chemin, TypeDoc, swOpenDocOptions_e.swOpenDocOptions_Silent, "", Erreur, Warning)
+    End If
+    
+    Set Doc = Nothing
     
 End Function
 

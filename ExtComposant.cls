@@ -7,17 +7,14 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = True
+'=======================================================================================
 Option Explicit
-Private pSw                 As SldWorks.SldWorks
+
 Private pNb                 As Integer
-Private pSwComposant          As Component2
+Private pSwComposant        As Component2
 Private pModele             As ExtModele
 Private pConfiguration      As New ExtConfiguration
 Private Const pNomClasse    As String = "ExtComposant"
-
-Private Sub Class_Initialize()
-    Set pSw = Application.SldWorks
-End Sub
 
 Private Sub Class_Terminate()
     
@@ -34,24 +31,20 @@ Public Function SetComposant(ByRef Composant As Component2, ByRef ModeleExt As E
         Set pModele = ModeleExt
         pNb = 1
         
-        Dim Modele          As ModelDoc2
         Dim Config          As Configuration
-        
-        Set Modele = pSw.GetOpenDocument(pModele.Fichier.Chemin)
         
         'Quand le composant est le composant racine [ModeleDoc.ConfigurationManager.ActiveConfiguration.GetRootComponent3(True)] ,
         'le nom de la configuration referencée n'est pas dispo, on passe donc par le ModelDoc
         'pour recuperer la configuration active
         If Composant.ReferencedConfiguration = vbNullString Then
-            Set Config = Modele.GetActiveConfiguration
+            Set Config = pModele.swModele.GetActiveConfiguration
         Else
-            Set Config = Modele.GetConfigurationByName(Composant.ReferencedConfiguration)
+            Set Config = pModele.swModele.GetConfigurationByName(Composant.ReferencedConfiguration)
         End If
         
         pConfiguration.SetConfiguration Config, pModele
         
         Set Config = Nothing
-        Set Modele = Nothing
         
         Exit Function
     End If
@@ -92,12 +85,11 @@ Public Function Configuration() As ExtConfiguration
     Set Configuration = pConfiguration
 End Function
 
-Public Function ListedesComposantsEnfants() As Collection
+Public Function ListedesComposantsEnfants(Optional PrendreEnCompteSupprime As Boolean = False) As Collection
     
     Dim vComposant  As Variant
     Dim Composant   As Component2
     Dim CompExt     As ExtComposant
-    Dim ModeleDoc   As ModelDoc2
     Dim ModeleExt   As ExtModele
     
     Set ListedesComposantsEnfants = New Collection
@@ -106,12 +98,15 @@ Public Function ListedesComposantsEnfants() As Collection
         
         Set Composant = vComposant
         
-        If Composant.IsSuppressed = False Then
+        If Not (Composant.IsSuppressed = False) Imp PrendreEnCompteSupprime Then
             Set ModeleExt = New ExtModele
             Set CompExt = New ExtComposant
-            Set ModeleDoc = Composant.GetModelDoc2
             
-            ModeleExt.SetModele ModeleDoc, pModele.Sw
+            'Si on utilise Composant.GetModelDoc2 dans le cas ou celui ci est supprimé, on recupère un NULL
+            'On passe donc par Composant.GetPathName
+            'Peut peut-être poser des pb dans de gros assemblage, puisque cette méthode ouvre le fichier en arrière plan
+            Set ModeleExt = pModele.Sw.Modele(Composant.GetPathName)
+            
             CompExt.SetComposant Composant, ModeleExt
             ModeleExt.SetComposant CompExt
             
@@ -119,6 +114,10 @@ Public Function ListedesComposantsEnfants() As Collection
         End If
     
     Next vComposant
+    
+    Set Composant = Nothing
+    Set CompExt = Nothing
+    Set ModeleExt = Nothing
 
 End Function
 
