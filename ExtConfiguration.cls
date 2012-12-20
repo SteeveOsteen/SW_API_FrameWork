@@ -7,15 +7,18 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = True
+'=======================================================================================
 Option Explicit
 
-Private pSwConfig             As Configuration
+Private pSwConfig           As Configuration
 Private pModele             As ExtModele
 Private pGestDeProprietes   As New ExtGestDeProprietes
+Private pGestDeAffichage    As New ExtGestDeAffichage
 Private Const pNomClasse    As String = "ExtConfiguration"
 
 Private Sub Class_Terminate()
     Set pGestDeProprietes = Nothing
+    Set pGestDeAffichage = Nothing
     Set pSwConfig = Nothing
 End Sub
 
@@ -27,10 +30,6 @@ Public Property Let Nom(s As String)
     swConfiguration.Name = s
 End Property
 
-Public Function GestDeProprietes() As ExtGestDeProprietes
-    Set GestDeProprietes = pGestDeProprietes
-End Function
-
 Public Function SetConfiguration(ByRef Config As Configuration, ByRef Modele As ExtModele) As Boolean
     
     If Not (Config Is Nothing) And Not (Modele Is Nothing) Then
@@ -39,6 +38,7 @@ Public Function SetConfiguration(ByRef Config As Configuration, ByRef Modele As 
         Set pModele = Modele
         
         pGestDeProprietes.SetGestionnaire swConfiguration.CustomPropertyManager, pModele
+        pGestDeAffichage.SetConfiguration Me
         
         Exit Function
     End If
@@ -46,6 +46,14 @@ Public Function SetConfiguration(ByRef Config As Configuration, ByRef Modele As 
     Debug.Assert False
     Debug.Print pNomClasse & ".SetConfiguration : le Modele de base n'est pas valide"
     
+End Function
+
+Public Function GestDeProprietes() As ExtGestDeProprietes
+    Set GestDeProprietes = pGestDeProprietes
+End Function
+
+Public Function GestDeAffichage() As ExtGestDeAffichage
+    Set GestDeAffichage = pGestDeAffichage
 End Function
 
 Public Function Activer() As Boolean

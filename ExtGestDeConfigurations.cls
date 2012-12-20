@@ -7,10 +7,21 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = True
+'=======================================================================================
 Option Explicit
 
 Private pModele                 As ExtModele
 Private Const pNomClasse        As String = "ExtGestDeConfigurations"
+
+Public Property Get LierLesAffichagesAuxConfigurations() As Boolean
+    If Not (pModele.swModele.ConfigurationManager.LinkDisplayStatesToConfigurations = False) Then
+        LierLesAffichagesAuxConfigurations = True
+    End If
+End Property
+
+Public Property Let LierLesAffichagesAuxConfigurations(T As Boolean)
+    pModele.swModele.ConfigurationManager.LinkDisplayStatesToConfigurations = T
+End Property
 
 Public Function SetModele(ByRef Modele As ExtModele) As Boolean
     

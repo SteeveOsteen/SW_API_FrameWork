@@ -7,6 +7,7 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = True
+'=======================================================================================
 Option Explicit
 
 Private pSwDossier              As BodyFolder
@@ -17,8 +18,8 @@ Private Const pNomClasse        As String = "ExtDossier"
 
 Private Sub Class_Terminate()
     
-    Set pPiece = Nothing
     Set pSwDossier = Nothing
+    Set pPiece = Nothing
     Set pGestDeProprietes = Nothing
 End Sub
 
